@@ -1,7 +1,6 @@
+#import neccessary packages
 import pandas as pd
-import numpy as np
 import yfinance as yf
-import matplotlib.pyplot as plt
 from datetime import datetime, date
 import plotly.graph_objects as go
 
