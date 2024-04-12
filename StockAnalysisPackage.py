@@ -1,4 +1,4 @@
-#import neccessary packages
+# import neccessary packages
 import pandas as pd
 import yfinance as yf
 from datetime import datetime, date
@@ -8,7 +8,27 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class StockAnalysis:
+    
+    """
+    StockAnalysis class is used to analyze stocks using yfinance package.
+    There are multiple functions for use along with various checks in place to ensure smooth running of the package.
+
+    Each function has individual comments for their use and outputs.
+    """
+
     def __init__(self, symbol, start_date, end_date):
+
+      """
+      In the initialization of our package class, three essential input parameters—namely, 'symbol', 'start_date,' and 'end_date' are required from the user upon creating an object of this class. These user-provided values are stored within the class and are subsequently utilized by various functions for their respective tasks. The class also initializes the 'stock_data' variable, which serves as a storage container for the fetched data in the form of a dataframe, to be utilized by subsequent functions after the 'fetch_stock_data' function is invoked.
+      
+      Attributes: 
+        symbol: A string value representing the ticker or stock name in the yahoo finance market.
+        start_date: A string value in the 'yyyy-mm-dd' format, determining the commencement date from which the data is to be fetched.
+        end_date: A string value in the 'yyyy-mm-dd' format, indicating the termination date until which the data should be fetched.
+      
+      Return: Object
+      """
+
       self.symbol = symbol
       self.start_date = start_date
       self.end_date = end_date
