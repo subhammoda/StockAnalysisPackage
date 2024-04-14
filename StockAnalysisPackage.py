@@ -36,6 +36,15 @@ class StockAnalysis:
 
     def fetch_stock_data(self):
 
+      """
+      The 'fetch_stock_data' function utilizes 'yf.download' to retrieve the data, storing it in the 'stock_data' variable as a dataframe with columns: Date, Open, High, Low, Close, Adj Close, and Volume.
+
+      Attributes:
+        None
+
+      Return: Object
+      """
+
       self.ticker = yf.Ticker(self.symbol)
       info = None
       today_date = date.today()
@@ -44,13 +53,13 @@ class StockAnalysis:
         info = self.ticker.info
         quoteType = info['quoteType']
 
-        if quoteType != 'EQUITY':   # Check if the ticker mentioned is a stock ticker or not
+        if quoteType != 'EQUITY':   # Validating that the symbol submitted by the user corresponds to a legitimate equity or stock ticker, excluding other forms of tickers like mutual funds.
           raise Exception("Symbol Error: Ticker does not belong to stock/equity")
         else:
           list_date = datetime.fromtimestamp(info['firstTradeDateEpochUtc']).strftime('%Y-%m-%d')
-          if self.start_date < list_date:   # Check if the start date is before the list date of stock
+          if self.start_date < list_date:   # Validate start_date and ascertain it does not precede the stock's listing date.
             raise Exception("Date Error: Start Date before stock List Date")
-          elif self.end_date > str(today_date):   # Check if the end date is after today's date
+          elif self.end_date > str(today_date):   # Validate end date for a future date
             raise Exception("Date Error: End Date after today's date")
           else:
             self.stock_data = yf.download(self.symbol, start=self.start_date, end=self.end_date)
@@ -69,10 +78,22 @@ class StockAnalysis:
 
     def visualize_candlestick(self, plot_start = None, plot_end = None):
 
+      """
+      This function offers users the capability to visualize the entire stock data using candlesticks, a widely employed visualization method in financial markets for price representation. 
+      
+      Attributes:
+        plot_start(optional): Specify start date for the plot, default data start date.
+        plot_end(optional): Specify end date for the plot, default data end date.
+
+      Output: Graph
+      """
+
       plot_start = plot_start or self.start_date
       plot_end = plot_end or self.end_date
 
       try:
+        # Validate if the specified date is within the data date range
+
         if plot_start < self.start_date:
           raise Exception("Date Error: Plot Start date provided is before the Data Fetch start date")
         elif plot_end > self.end_date:
@@ -88,6 +109,16 @@ class StockAnalysis:
         print(e)
 
     def calculate_moving_average(self, window = 21):
+
+      """
+      This function is designed to compute the moving average over the stock data. The resulting value is then computed and stored as a new column in the 'stock_data' dataframe, named 'MA'.
+
+      Attribute:
+        window(optional): The period over which the moving average is calculated, default 21
+
+      Return: Object
+      """
+      
       self.window = window
 
       try:
@@ -98,6 +129,10 @@ class StockAnalysis:
           print(f"Error calculating moving average: {e}")
 
     def visualize_moving_average(self, plot_start = None, plot_end = None):
+
+      """
+      
+      """
 
       plot_start = plot_start or self.start_date
       plot_end = plot_end or self.end_date
@@ -134,6 +169,18 @@ class StockAnalysis:
         print(e)
 
     def perform_macd(self, short_window=13, long_window=33, signal_window=9):
+
+      """
+      The function is employed to compute Moving Average Convergence/Divergence (MACD) values based on specified window configurations. The values of macd and signal lines are stored as additional columns to the stock_data dataframe, with column names as 'MACD' and 'Signal_Line'.
+
+      Attributes:
+        short_window(optional): specify the short window for macd caluclation, default 13
+        long_window(optional): specify the long window for macd caluclation, default 33
+        signal_window(optional): specify the singal window for macd caluclation, default 9
+
+      Return: Object
+      """
+      
       try:
           # Calculate short-term and long-term exponential moving averages
           short_ema = self.stock_data['Close'].ewm(span=short_window, adjust=False).mean()
@@ -191,6 +238,17 @@ class StockAnalysis:
 
 
     def calculate_bollinger_bands(self, window=20, num_std=2):
+
+      """
+      The function is employed to compute the upper and lower bands for Bollinger Bands. The calculated values are stored in the 'stock_data' dataframe under the columns 'Upper_Band' and 'Lower_Band' respectively.
+
+      Attributes:
+        window(optional): specify the window to calculate bollinger bands, default 20
+        num_std(optional): specify the number of standard devision, default 2
+      
+      Return: Object
+      """
+      
       try:
           # Calculate moving average
           self.stock_data['MA'] = self.stock_data['Close'].rolling(window=window).mean()
@@ -245,6 +303,16 @@ class StockAnalysis:
 
 
     def calculate_rsi(self, window=14):
+
+      """
+      The function is used to calculate the relative strength index (RSI) of the stock. The calculated RSI values are stored in the 'stock_data' dataframe under the column 'RSI.' 
+
+      Attributes:
+        window(optional): specify the period over which RSI is caluclated, default 14
+      
+      Return: Object
+      """
+      
       try:
           # Calculate daily price changes
           daily_changes = self.stock_data['Close'].diff()
@@ -285,6 +353,16 @@ class StockAnalysis:
           print(e)
 
     def get_latest_news(self):
+
+      """
+      In addition to the technical aspects, market news significantly influences stocks. This function offers users the option to retrieve and read the latest news relevant to the stock they are analyzing. In the event of available news, the function provides three key details: the news title, a link to the website for accessing the complete article, and the name of the publisher.
+
+      Attributes:
+        None
+
+      Return: String
+      """
+      
       try:
         if not self.ticker.news:
           raise Exception("No News: Cannot fetch latest news.")
