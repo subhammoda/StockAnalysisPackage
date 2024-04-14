@@ -76,38 +76,6 @@ class StockAnalysis:
         elif "Symbol" in str(e):
           print(e)
 
-    def visualize_candlestick(self, plot_start = None, plot_end = None):
-
-      """
-      This function offers users the capability to visualize the entire stock data using candlesticks, a widely employed visualization method in financial markets for price representation. 
-      
-      Attributes:
-        plot_start(optional): Specify start date for the plot, default data start date.
-        plot_end(optional): Specify end date for the plot, default data end date.
-
-      Output: Graph
-      """
-
-      plot_start = plot_start or self.start_date
-      plot_end = plot_end or self.end_date
-
-      try:
-        # Validate if the specified date is within the data date range
-
-        if plot_start < self.start_date:
-          raise Exception("Date Error: Plot Start date provided is before the Data Fetch start date")
-        elif plot_end > self.end_date:
-          raise Exception("Date Error: Plot End date provided is after the Data Fetch end date")
-        else:
-          plot_data = self.stock_data[(self.stock_data['Date'] >= plot_start) & (self.stock_data['Date'] <= plot_end)]
-
-          fig = go.Figure(data=[go.Candlestick(x=plot_data['Date'],open=plot_data['Open'],\
-                                               high=plot_data['High'],low=plot_data['Low'], close=plot_data['Close'])])
-          fig.update_layout(xaxis_rangeslider_visible=False)
-          fig.show()
-      except Exception as e:
-        print(e)
-
     def calculate_moving_average(self, window = 21):
 
       """
@@ -128,47 +96,7 @@ class StockAnalysis:
       except Exception as e:
           print(f"Error calculating moving average: {e}")
 
-    def visualize_moving_average(self, plot_start = None, plot_end = None):
-
-      """
-      
-      """
-
-      plot_start = plot_start or self.start_date
-      plot_end = plot_end or self.end_date
-
-      try:
-        if plot_start < self.start_date:
-          raise Exception("Date Error: Plot Start date provided is before the Data Fetch start date")
-        elif plot_end > self.end_date:
-          raise Exception("Date Error: Plot End date provided is after the Data Fetch end date")
-        else:
-          plot_data = self.stock_data[(self.stock_data['Date'] >= plot_start) & (self.stock_data['Date'] <= plot_end)]
-
-          candlestick_trace = go.Candlestick(x=plot_data['Date'],
-                                   open=plot_data['Open'],
-                                   high=plot_data['High'],
-                                   low=plot_data['Low'],
-                                   close=plot_data['Close'],
-                                   name='Value')
-          ma_trace = go.Scatter(x=plot_data['Date'],
-                                y=plot_data['MA'],
-                                mode='lines',
-                                name=f'Moving Average ({self.window}-day)',
-                                line=dict(color="#0000ff"))
-
-          layout = go.Layout(title='Candlestick Chart with Moving Average',
-                            xaxis=dict(title='Date'),
-                            yaxis=dict(title='Price'))
-
-          fig = go.Figure(data=[candlestick_trace, ma_trace], layout=layout)
-          fig.update_layout(xaxis_rangeslider_visible=False)
-
-          fig.show()
-      except Exception as e:
-        print(e)
-
-    def perform_macd(self, short_window=13, long_window=33, signal_window=9):
+    def calculate_macd(self, short_window=13, long_window=33, signal_window=9):
 
       """
       The function is employed to compute Moving Average Convergence/Divergence (MACD) values based on specified window configurations. The values of macd and signal lines are stored as additional columns to the stock_data dataframe, with column names as 'MACD' and 'Signal_Line'.
@@ -191,51 +119,9 @@ class StockAnalysis:
           self.stock_data['Signal_Line'] = self.stock_data['MACD'].ewm(span=signal_window,\
                                                                        adjust=False).mean()
 
-          print("MACD analysis performed successfully.")
+          print("MACD analysis calculated successfully.")
       except Exception as e:
-          print(f"Error performing MACD analysis: {e}")
-
-    def visualize_macd(self, plot_start = None, plot_end = None):
-      plot_start = plot_start or self.start_date
-      plot_end = plot_end or self.end_date
-      try:
-        if plot_start < self.start_date:
-          raise Exception("Date Error: Plot Start date provided is before the Data Fetch start date")
-        elif plot_end > self.end_date:
-          raise Exception("Date Error: Plot End date provided is after the Data Fetch end date")
-        else:
-          plot_data = self.stock_data[(self.stock_data['Date'] >= plot_start) & (self.stock_data['Date'] <= plot_end)]
-
-          macd_trace = go.Scatter(x=plot_data['Date'], y=plot_data['MACD'], mode='lines', name='MACD')
-          signal_trace = go.Scatter(x=plot_data['Date'], y=plot_data['Signal_Line'], mode='lines', name='Signal Line')
-
-          layout = go.Layout(title='MACD Indicator',
-                      xaxis=dict(title='Date'),
-                      yaxis=dict(title='MACD Value'))
-          fig = go.Figure(data=[macd_trace, signal_trace], layout=layout)
-          fig.show()
-      except Exception as e:
-        print(e)
-
-    def visualize_macd_histogram(self, plot_start=None, plot_end=None):
-      try:
-          # Calculate MACD Histogram
-          self.stock_data['MACD_Histogram'] = self.stock_data['MACD'] - self.stock_data['Signal_Line']
-
-          # Visualize MACD Histogram
-          plot_data = self.stock_data[(self.stock_data['Date'] >= plot_start) & (self.stock_data['Date'] <= plot_end)]
-          histogram_trace = go.Bar(x=plot_data['Date'], y=plot_data['MACD_Histogram'], name='MACD Histogram')
-
-          layout = go.Layout(title='MACD Histogram',
-                      xaxis=dict(title='Date'),
-                      yaxis=dict(title='MACD Histogram'))
-
-          fig = go.Figure(data=[histogram_trace], layout=layout)
-          fig.show()
-
-      except Exception as e:
-          print(f"Error visualizing MACD Histogram: {e}")
-
+          print(f"Error calculating MACD analysis: {e}")
 
     def calculate_bollinger_bands(self, window=20, num_std=2):
 
@@ -264,16 +150,114 @@ class StockAnalysis:
       except Exception as e:
           print(f"Error calculating Bollinger Bands: {e}")
 
+    def calculate_rsi(self, window=14):
 
-    def visualize_bollinger_bands(self, plot_start=None, plot_end=None):
+      """
+      The function is used to calculate the relative strength index (RSI) of the stock. The calculated RSI values are stored in the 'stock_data' dataframe under the column 'RSI'. 
+
+      Attributes:
+        window(optional): specify the period over which RSI is caluclated, default 14
+      
+      Return: Object
+      """
+      
+      try:
+          # Calculate daily price changes
+          daily_changes = self.stock_data['Close'].diff()
+          # Calculate average gains and losses over the specified window
+          avg_gain = daily_changes.where(daily_changes > 0, 0).rolling(window=window).mean()
+          avg_loss = -daily_changes.where(daily_changes < 0, 0).rolling(window=window).mean()
+          # Calculate Relative Strength (RS)
+          relative_strength = avg_gain / avg_loss
+          # Calculate Relative Strength Index (RSI)
+          self.stock_data['RSI'] = 100 - (100 / (1 + relative_strength))
+          print(f"RSI (window={window}) calculated successfully.")
+      except Exception as e:
+          print(f"Error calculating RSI: {e}")
+
+    def visualize_data(self, plot_start = None, plot_end = None, options = None):
+
+      """
+      This function offers users the capability to visualize the entire stock data using candlesticks, a widely employed visualization method in financial markets for price representation. 
+      
+      Attributes:
+        plot_start(optional): Specify start date for the plot, default data start date.
+        plot_end(optional): Specify end date for the plot, default data end date.
+        options(optional): Specify if you want to plot "ma", "macd", "macd_hist", "bollinger_bands" or "rsi".  
+
+      Output: Graph
+      """
+
       plot_start = plot_start or self.start_date
       plot_end = plot_end or self.end_date
+
       try:
-          if plot_start < self.start_date:
-              raise Exception("Date Error: Plot Start date provided is before the Data Fetch start date")
-          elif plot_end > self.end_date:
-              raise Exception("Date Error: Plot End date provided is after the Data Fetch end date")
-          else:
+        # Validate if the specified date is within the data date range
+
+        if plot_start < self.start_date:
+          raise Exception("Date Error: Plot Start date provided is before the Data Fetch start date")
+        elif plot_end > self.end_date:
+          raise Exception("Date Error: Plot End date provided is after the Data Fetch end date")
+      except Exception as e:
+        print(e)
+      else:
+        try:
+          if options == "ma":
+            if "MA" not in self.stock_data.columns:
+              raise Exception("Moving average not calculated")
+            else:
+              plot_data = self.stock_data[(self.stock_data['Date'] >= plot_start) & (self.stock_data['Date'] <= plot_end)]
+
+              candlestick_trace = go.Candlestick(x=plot_data['Date'],
+                                      open=plot_data['Open'],
+                                      high=plot_data['High'],
+                                      low=plot_data['Low'],
+                                      close=plot_data['Close'],
+                                      name='Value')
+              ma_trace = go.Scatter(x=plot_data['Date'],
+                                    y=plot_data['MA'],
+                                    mode='lines',
+                                    name=f'Moving Average ({self.window}-day)',
+                                    line=dict(color="#0000ff"))
+
+              layout = go.Layout(title='Candlestick Chart with Moving Average',
+                                xaxis=dict(title='Date'),
+                                yaxis=dict(title='Price'))
+
+              fig = go.Figure(data=[candlestick_trace, ma_trace], layout=layout)
+              fig.update_layout(xaxis_rangeslider_visible=False)
+          elif options == "macd":
+            if "MACD" not in self.stock_data.columns:
+              raise Exception("MACD not calculated")
+            else:
+              plot_data = self.stock_data[(self.stock_data['Date'] >= plot_start) & (self.stock_data['Date'] <= plot_end)]
+
+              macd_trace = go.Scatter(x=plot_data['Date'], y=plot_data['MACD'], mode='lines', name='MACD')
+              signal_trace = go.Scatter(x=plot_data['Date'], y=plot_data['Signal_Line'], mode='lines', name='Signal Line')
+
+              layout = go.Layout(title='MACD Indicator',
+                          xaxis=dict(title='Date'),
+                          yaxis=dict(title='MACD Value'))
+              fig = go.Figure(data=[macd_trace, signal_trace], layout=layout)
+          elif options == "macd_hist":
+            if "MACD" not in self.stock_data.columns:
+              raise Exception("MACD not calculated")
+            else:
+              self.stock_data['MACD_Histogram'] = self.stock_data['MACD'] - self.stock_data['Signal_Line']
+
+              # Visualize MACD Histogram
+              plot_data = self.stock_data[(self.stock_data['Date'] >= plot_start) & (self.stock_data['Date'] <= plot_end)]
+              histogram_trace = go.Bar(x=plot_data['Date'], y=plot_data['MACD_Histogram'], name='MACD Histogram')
+
+              layout = go.Layout(title='MACD Histogram',
+                          xaxis=dict(title='Date'),
+                          yaxis=dict(title='MACD Histogram'))
+
+              fig = go.Figure(data=[histogram_trace], layout=layout)
+          elif options == "bollinger_bands":
+            if "Upper_Band" not in self.stock_data.columns:
+              raise Exception("Bollinger bands are not calculated")
+            else:
               plot_data = self.stock_data[(self.stock_data['Date'] >= plot_start) & (self.stock_data['Date'] <= plot_end)]
               candlestick_trace = go.Candlestick(x=plot_data['Date'],
                                                 open=plot_data['Open'],
@@ -297,50 +281,15 @@ class StockAnalysis:
 
               fig = go.Figure(data=[candlestick_trace, upper_band_trace, lower_band_trace], layout=layout)
               fig.update_layout(xaxis_rangeslider_visible=False)
-              fig.show()
-      except Exception as e:
-          print(e)
-
-
-    def calculate_rsi(self, window=14):
-
-      """
-      The function is used to calculate the relative strength index (RSI) of the stock. The calculated RSI values are stored in the 'stock_data' dataframe under the column 'RSI.' 
-
-      Attributes:
-        window(optional): specify the period over which RSI is caluclated, default 14
-      
-      Return: Object
-      """
-      
-      try:
-          # Calculate daily price changes
-          daily_changes = self.stock_data['Close'].diff()
-          # Calculate average gains and losses over the specified window
-          avg_gain = daily_changes.where(daily_changes > 0, 0).rolling(window=window).mean()
-          avg_loss = -daily_changes.where(daily_changes < 0, 0).rolling(window=window).mean()
-          # Calculate Relative Strength (RS)
-          relative_strength = avg_gain / avg_loss
-          # Calculate Relative Strength Index (RSI)
-          self.stock_data['RSI'] = 100 - (100 / (1 + relative_strength))
-          print(f"RSI (window={window}) calculated successfully.")
-      except Exception as e:
-          print(f"Error calculating RSI: {e}")
-
-    def visualize_rsi(self, plot_start=None, plot_end=None):
-      plot_start = plot_start or self.start_date
-      plot_end = plot_end or self.end_date
-      try:
-          if plot_start < self.start_date:
-              raise Exception("Date Error: Plot Start date provided is before the Data Fetch start date")
-          elif plot_end > self.end_date:
-              raise Exception("Date Error: Plot End date provided is after the Data Fetch end date")
-          else:
+          elif options == "rsi":
+            if "RSI" not in self.stock_data.columns:
+              raise Exception("RSI not calculated")
+            else:
               plot_data = self.stock_data[(self.stock_data['Date'] >= plot_start) & (self.stock_data['Date'] <= plot_end)]
 
               rsi_trace = go.Scatter(x=plot_data['Date'], y=plot_data['RSI'], mode='lines', name='RSI', line=dict(color="#FF5733"))
 
-              # Add horizontal lines for overbought and oversold levels (e.g., 70 and 30)
+              # Add horizontal lines for overbought and oversold levels
               overbought_trace = go.Scatter(x=plot_data['Date'], y=[70] * len(plot_data), mode='lines', name='Overbought', line=dict(color="#FF0000"))
               oversold_trace = go.Scatter(x=plot_data['Date'], y=[30] * len(plot_data), mode='lines', name='Oversold', line=dict(color="#00FF00"))
               layout = go.Layout(title='Relative Strength Index (RSI)',
@@ -348,8 +297,14 @@ class StockAnalysis:
                                 yaxis=dict(title='RSI'))
               fig = go.Figure(data=[rsi_trace, overbought_trace, oversold_trace], layout=layout)
               fig.update_layout(xaxis_rangeslider_visible=False)
-              fig.show()
-      except Exception as e:
+          else:
+            plot_data = self.stock_data[(self.stock_data['Date'] >= plot_start) & (self.stock_data['Date'] <= plot_end)]
+
+            fig = go.Figure(data=[go.Candlestick(x=plot_data['Date'],open=plot_data['Open'],\
+                                                high=plot_data['High'],low=plot_data['Low'], close=plot_data['Close'])])
+            fig.update_layout(xaxis_rangeslider_visible=False)
+          fig.show()
+        except Exception as e:
           print(e)
 
     def get_latest_news(self):
